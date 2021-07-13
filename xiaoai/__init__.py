@@ -1,8 +1,10 @@
+import base64
 import json
-from hashlib import md5
+from hashlib import md5, sha1
 
 import httpx
 from xiaoai import constants
+from xiaoai.exceptions import ServiceAuthError
 
 
 class XiaoAi:
@@ -14,6 +16,20 @@ class XiaoAi:
 
     def _parse_response(self, content: str):
         return json.loads(content.replace('&&&START&&&', ''))
+
+    def _get_client_sign(self, nonce: str, ssecurity: str):
+        s = f'nonce={nonce}&{ssecurity}'
+        return base64.b64encode(sha1(s.encode()).digest())
+
+    async def login_miai(self, auth_info: dict):
+        nonce = auth_info.get('nonce')
+        ssecurity = auth_info.get('ssecurity')
+        location = auth_info.get('location')
+        sign = self._get_client_sign(nonce, ssecurity)
+        async with httpx.AsyncClient() as client:
+            res = await client.get(location, params={
+                'clientSign': sign
+            })
 
     async def _get_login_sign(self):
         async with httpx.AsyncClient() as client:
@@ -28,14 +44,16 @@ class XiaoAi:
             res = await client.post(
                 constants.SERVICE_AUTH_URL, data={
                     'user': self._user,
-                    'hash': md5(self._password.encode()).hexdigest(),
+                    'hash': md5(self._password.encode()).hexdigest().upper(),
                     'callback': 'https://api.mina.mi.com/sts',
                     **self._common_params,
                     **sign
                 },
                 headers={
-
+                    'Cookie': f'deviceId={constants.APP_DEVICE_ID};sdkVersion={constants.SDK_VER}'
                 }
             )
             ret = self._parse_response(res.text)
+            if ret.get('code') != 0:
+                raise ServiceAuthError(ret.get('desc'))
             return ret
