@@ -1,0 +1,35 @@
+[tool.poetry]
+authors = ["long2ice <long2ice@gmail.com>"]
+description = "小爱音箱非官方SDK。"
+documentation = "https://github.com/long2ice/xiaoai"
+homepage = "https://github.com/long2ice/xiaoai"
+include = ["CHANGELOG.md", "LICENSE", "README.md"]
+keywords = ["xiaoai", "xiaomi"]
+license = "Apache-2.0"
+name = "xiaoai"
+packages = [
+  {include = "xiaoai"},
+]
+readme = "README.md"
+repository = "https://github.com/long2ice/xiaoai.git"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+httpx = "*"
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+# test
+pytest = "*"
+pytest-asyncio = "*"
+pytest-sugar = "*"
+pytest-xdist = "*"
+# lint
+black = "*"
+flake8 = "*"
+isort = "*"
+mypy = "*"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
