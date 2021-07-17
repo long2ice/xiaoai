@@ -29,6 +29,7 @@ black = "*"
 flake8 = "*"
 isort = "*"
 mypy = "*"
+pytest-dependency = "*"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
